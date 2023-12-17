@@ -26,6 +26,23 @@ rec {
   }:
     raspberrypiWirelessFirmware.overrideAttrs (prev: {
       inherit version srcs;
+
+      installPhase = ''
+        runHook preInstall
+        mkdir -p "$out/lib/firmware/brcm"
+
+        # Wifi firmware
+        cp -rv "$NIX_BUILD_TOP/firmware-nonfree/debian/config/brcm80211/." "$out/lib/firmware/"
+
+        # Bluetooth firmware
+        cp -rv "$NIX_BUILD_TOP/bluez-firmware/broadcom/." "$out/lib/firmware/brcm"
+
+        # brcmfmac43455-stdio.bin is a symlink to the non-existent path: ../cypress/cyfmac43455-stdio.bin.
+        # See https://github.com/RPi-Distro/firmware-nonfree/issues/26
+        ln -s "./cyfmac43455-sdio-standard.bin" "$out/lib/firmware/cypress/cyfmac43455-sdio.bin"
+
+        runHook postInstall
+      '';
     });
 
   getFirmwares = versions': pkgs: let

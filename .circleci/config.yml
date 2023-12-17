@@ -45,7 +45,7 @@ jobs:
       - run:
           name: Build system
           command: |
-            nix build '.#packages."aarch64-linux".<< parameters.package >>'
+            nix build '.#packages.aarch64-linux.<< parameters.package >>'
       - run:
           name: Push cache
           no_output_timeout: 60m # 10 mins are often not enough
