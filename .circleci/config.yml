@@ -1,0 +1,45 @@
+---
+version: 2.1
+
+workflows:
+  version: 2
+  workflow:
+    jobs:
+    - build:
+        filters:
+          branches:
+            only:
+              - master
+orbs:
+  nix: eld/nix@1.1.1
+
+jobs:
+  build:
+    machine:
+      image: ubuntu-2204:2023.07.1
+    parameters:
+      host:
+        type: string
+    resource_class: arm.large
+    steps:
+      - nix/install:
+          channels: nixpkgs=https://nixos.org/channels/nixos-23.11
+          extra-conf: |
+            experimental-features = flakes nix-command
+      - nix/install-cachix
+      - checkout
+      - run:
+          name: Setup Cachix repos
+          command: |
+            cachix use nix-community
+            cachix use nix-rpi-kernels
+            ./.ci/install-nix.sh > /tmp/store-path-pre-build
+      - run:
+          name: Build system
+          command: |
+            nix flake show --json | jq -r '.packages."aarch64-linux"|keys[]|"packages.\"aarch64-linux\".\(.)"' | xargs -I {} nix build .#{}
+      - run:
+          name: Push cache
+          no_output_timeout: 60m # 10 mins are often not enough
+          command: |
+            ./.ci/push-paths.sh cachix "--compression-method xz --compression-level 9 --jobs 8" nix-rpi-kernels ""  ""
