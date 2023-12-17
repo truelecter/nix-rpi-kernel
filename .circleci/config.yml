@@ -30,7 +30,7 @@ jobs:
           command: |
             cachix use nix-community
             cachix use nix-rpi-kernels
-            ./.ci/install-nix.sh > /tmp/store-path-pre-build
+            ./.ci/list-paths.sh > /tmp/store-path-pre-build
       - run:
           name: Build system
           command: |
