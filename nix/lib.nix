@@ -80,14 +80,22 @@ rec {
   in {
     # linux_rpi1 = rpiKernel 1;
     # linux_rpi2 = rpiKernel 2;
-    linux_rpi3 = rpiKernel 3;
-    linux_rpi4 = rpiKernel 4;
-    linux_rpi5 = rpiKernel 5;
+    linuxRpi3 = rpiKernel 3;
+    linuxRpi4 = rpiKernel 4;
+    linuxRpi5 = rpiKernel 5;
   };
 
-  getPackages = versions': pkgs:
-    (
-      getKernels versions' pkgs
+  getKernelPackages = kernels: pkgs: let
+    inherit (pkgs.lib) mapAttrs' nameValuePair;
+  in
+    mapAttrs' (name: value: nameValuePair "${name}Packages" (pkgs.linuxPackagesFor value)) kernels;
+
+  getPackages = versions': pkgs: let
+    kernels = getKernels versions' pkgs;
+  in
+    kernels
+    // (
+      getKernelPackages kernels pkgs
     )
     // (
       getFirmwares versions' pkgs
