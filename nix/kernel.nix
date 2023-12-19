@@ -2,7 +2,6 @@
   stdenv,
   lib,
   buildLinux,
-  kernelPatches,
   #
   rpiVersion,
   version,
@@ -35,11 +34,6 @@ lib.overrideDerivation (buildLinux (
       // (args.features or {});
 
     extraMeta.platforms = with lib.platforms; arm ++ lib.optionals (rpiVersion > 2) aarch64;
-
-    kernelPatches = with kernelPatches; [
-      bridge_stp_helper
-      request_key_helper
-    ];
 
     structuredExtraConfig = with lib.kernel;
       if (rpiVersion < 5)

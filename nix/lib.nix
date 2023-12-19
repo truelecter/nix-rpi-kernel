@@ -1,13 +1,4 @@
 rec {
-  kernelPackages = {
-    version,
-    src,
-    rpiVersion,
-    callPackage ? callPackage,
-    ...
-  } @ args:
-    callPackage ./kernel.nix args;
-
   firmwarePackage = {
     version,
     src,
@@ -71,11 +62,14 @@ rec {
     inherit (versions) version kernel;
 
     rpiKernel = rpiVersion:
-      kernelPackages {
+      pkgs.callPackage ./kernel.nix {
         inherit rpiVersion version;
-        inherit (pkgs) callPackage;
-
         src = kernel;
+
+        kernelPatches = with pkgs.kernelPatches; [
+          bridge_stp_helper
+          request_key_helper
+        ];
       };
   in {
     # linux_rpi1 = rpiKernel 1;
