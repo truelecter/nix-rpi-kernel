@@ -34,6 +34,8 @@ jobs:
           channels: nixpkgs=https://nixos.org/channels/nixos-23.11
           extra-conf: |
             experimental-features = flakes nix-command
+            cores = 0
+            max-jobs = auto
       - nix/install-cachix
       - checkout
       - run:
