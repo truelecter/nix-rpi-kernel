@@ -32,7 +32,7 @@ linux_aarch64_task:
   - cachix use nix-rpi-kernels
   - ./.ci/list-paths.sh > /tmp/store-path-pre-build
 
-  build_system_script: nix build ".#packages.aarch64-linux.$PACKAGE"
+  build_system_script: $NIX build ".#packages.aarch64-linux.$PACKAGE"
 
   upload_paths_to_cachix_script: ./.ci/push-paths.sh cachix "--compression-method xz --compression-level 9 --jobs 8" nix-rpi-kernels ""  ""
 
