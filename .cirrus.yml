@@ -24,7 +24,7 @@ linux_aarch64_task:
   prepare_nix_env_script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
   # TODO pin or something
-  - nix-channel --add https://nixos.org/channels/nixpkgs-23.11
+  - nix-channel --add https://nixos.org/channels/nixos-23.11
   - nix-channel --update
   - git config --global --add safe.directory "$(pwd)"
 
