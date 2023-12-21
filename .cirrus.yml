@@ -1,0 +1,54 @@
+
+env:
+  CACHIX_AUTH_TOKEN: ENCRYPTED[!74139d0ea68b319cc8e06ba0554a30a7a67300c079a4953d260d8fad8b3e75e89ff9e95014a596bd7f56825c23f94dde!]
+  NIX: nix --extra-experimental-features nix-command --extra-experimental-features flakes
+  # CIRRUS_SHELL: "/bin/bash"
+
+linux_aarch64_task:
+  timeout_in: 120m
+  only_if: $CIRRUS_BRANCH == 'master' || $CIRRUS_PR != ''
+
+  name: Build NixOS aarch64 systems
+
+  env:
+    NIXOS_HOST: nonexisting
+    USER: "root"
+    HOME: "/root"
+    PATH: "$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/nix/var/nix/profiles/per-user/$USER/profile/bin:$PATH"
+
+  arm_container:
+    image: nixos/nix:2.19.0
+    cpu: 8
+    memory: 16G
+
+  prepare_nix_env_script:
+  - nix-env -iA cachix -f https://cachix.org/api/v1/install
+  # TODO pin or something
+  - nix-channel --add https://nixos.org/channels/nixpkgs-23.11
+  - nix-channel --update
+  - git config --global --add safe.directory "$(pwd)"
+
+  - cachix use nix-community
+  - cachix use nix-rpi-kernels
+  - ./.ci/list-paths.sh > /tmp/store-path-pre-build
+
+  build_system_script: nix build ".#packages.aarch64-linux.$PACKAGE"
+
+  upload_paths_to_cachix_script: ./.ci/push-paths.sh cachix "--compression-method xz --compression-level 9 --jobs 8" nix-rpi-kernels ""  ""
+
+  matrix:
+  - name: Build linuxRpi3
+    env:
+      PACKAGE: linuxRpi3
+  - name: Build linuxRpi4
+    env:
+      PACKAGE: linuxRpi4
+  - name: Build linuxRpi5
+    env:
+      PACKAGE: linuxRpi5
+  - name: Build raspberrypifw
+    env:
+      PACKAGE: raspberrypifw
+  - name: Build raspberrypiWirelessFirmware
+    env:
+      PACKAGE: raspberrypiWirelessFirmware
