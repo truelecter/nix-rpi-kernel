@@ -42,6 +42,7 @@ lib.overrideDerivation (buildLinux (
         DRM_RP1_DSI = no;
         DRM_RP1_DPI = no;
         DRM_RP1_VEC = no;
+        BCM2712_IOMMU = no;
       }
       else {};
   }
